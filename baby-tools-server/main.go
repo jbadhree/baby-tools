@@ -24,7 +24,9 @@ func main() {
 }
 
 func HandleTest(w http.ResponseWriter, r *http.Request) {
-
+	// Initialize to empty string so that it can be used to send response
+	var activity_name = ""
+	var activity_time = ""
 	// If its not a POST error out
 	if r.Method == http.MethodPost {
 		var body requestBody // 'body' is of type struct requestBody
@@ -36,6 +38,9 @@ func HandleTest(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
+
+		activity_name = body.ActivityName
+		activity_time = body.ActivityTime
 		// Connect DB based in values from Env Vars
 		// Need to move it to sep function
 		db, err := sql.Open("mysql", os.Getenv("DB_USER_NAME")+":"+os.Getenv("DB_USER_PASS")+"@tcp("+os.Getenv("DB_HOST")+":"+os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME"))
@@ -53,9 +58,9 @@ func HandleTest(w http.ResponseWriter, r *http.Request) {
 		// What if the user forgot to press stop ?
 		var q = "" // better variable names
 		if body.ActivityName == "Start" {
-			q = fmt.Sprintf("insert into timer_entries (entry_name,start_date_time) values ('test','%s')", body.ActivityTime)
+			q = fmt.Sprintf("insert into timer_entries (entry_name,start_date_time) values ('%s','%s')", os.Getenv("ENTRY_NAME"), body.ActivityTime)
 		} else {
-			q = fmt.Sprintf("update timer_entries set end_date_time = '%s' where entry_id=(select * from (select entry_id from timer_entries where end_date_time is null order by entry_id desc limit 1) ali);", body.ActivityTime)
+			q = fmt.Sprintf("update timer_entries set end_date_time = '%s' where entry_id=(select * from (select entry_id from timer_entries where entry_name='%s' and end_date_time is null order by entry_id desc limit 1) ali);", body.ActivityTime, os.Getenv("ENTRY_NAME"))
 		}
 
 		insert, err := db.Query(q)
@@ -88,6 +93,10 @@ func HandleTest(w http.ResponseWriter, r *http.Request) {
 	// if start send last nap timing
 	// if stop send duration of current/latest nap
 	// we also need to send  last nap timing
-	fmt.Fprintf(w, "HW")
+	if activity_name == "Start" {
+		fmt.Fprintf(w, "Nap Started at "+activity_time)
+	} else {
+		fmt.Fprintf(w, "Nap Ended at "+activity_time)
+	}
 
 }

@@ -27,8 +27,12 @@ function App() {
         body: JSON.stringify(reqBody)
     };
 
-      //const response = await fetch('http://localhost:4001/status', requestOptions);
-      const response = await fetch('http://localhost:8080/test', requestOptions);
+      
+      // for local 
+      // const response = await fetch('http://localhost:8080/test', requestOptions);
+
+      // for remote
+      const response = await fetch('http://192.168.8.205:8080/test', requestOptions);
       const text = await response.text();
 
       
