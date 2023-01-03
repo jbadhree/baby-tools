@@ -62,7 +62,7 @@ function App() {
       // for local
       // const response = await fetch('http://localhost:8080/test', requestOptions);
 
-      f// or remote
+      // for remote
       const response = await fetch(
         "http://192.168.8.205:8080/test",
         requestOptions
