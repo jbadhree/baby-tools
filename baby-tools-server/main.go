@@ -17,9 +17,15 @@ type requestBody struct {
 	ActivityTime string `json:"activityTime"`
 }
 
+type TimeFromDB struct {
+	StartDateTime string `json:"start_date_time"`
+	EndDateTime   string `json:"end_date_time"`
+}
+
 // endpoint is /test now may need to change
 func main() {
 	http.HandleFunc("/test", HandleTest)
+	http.HandleFunc("/current", HandleCurrentStatus)
 	http.ListenAndServe(":8080", nil) // may need to change port
 }
 
@@ -50,8 +56,6 @@ func HandleTest(w http.ResponseWriter, r *http.Request) {
 		}
 		defer db.Close()
 
-		log.Printf("DB Connection Success!")
-
 		// when user hits start we can insert the start_date_time in DB
 		// When the use hits stop - find the latest entry where stop is null and enter it there
 		// What if user hits stop first ?
@@ -60,10 +64,10 @@ func HandleTest(w http.ResponseWriter, r *http.Request) {
 		if body.ActivityName == "Start" {
 			q = fmt.Sprintf("insert into timer_entries (entry_name,start_date_time) values ('%s','%s')", os.Getenv("ENTRY_NAME"), body.ActivityTime)
 		} else {
-			q = fmt.Sprintf("update timer_entries set end_date_time = '%s' where entry_id=(select * from (select entry_id from timer_entries where entry_name='%s' and end_date_time is null order by entry_id desc limit 1) ali);", body.ActivityTime, os.Getenv("ENTRY_NAME"))
+			q = fmt.Sprintf("update timer_entries set end_date_time = '%s' where entry_id=(select * from (select entry_id from timer_entries where entry_name='%s' and end_date_time is null order by entry_id desc limit 1) ali)", body.ActivityTime, os.Getenv("ENTRY_NAME"))
 		}
 
-		insert, err := db.Query(q)
+		insertOrUpdate, err := db.Query(q)
 		if err != nil {
 			if body.ActivityName == "Start" {
 				log.Printf("Error with Start/Insert!")
@@ -72,7 +76,7 @@ func HandleTest(w http.ResponseWriter, r *http.Request) {
 			}
 			panic(err.Error())
 		}
-		defer insert.Close()
+		defer insertOrUpdate.Close()
 
 		if body.ActivityName == "Start" {
 			log.Printf("Yay, values added!")
@@ -88,7 +92,6 @@ func HandleTest(w http.ResponseWriter, r *http.Request) {
 	// Need this header for CORS issue
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	log.Printf("inside HandleTest")
 	// must send a better text
 	// if start send last nap timing
 	// if stop send duration of current/latest nap
@@ -98,5 +101,61 @@ func HandleTest(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "Nap Ended at "+activity_time)
 	}
+
+}
+
+// function to get current status from db
+func HandleCurrentStatus(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Inside Current Status")
+
+	var currentStatusText = ""
+	if r.Method == http.MethodGet {
+
+		// May need to move to different function
+		db, err := sql.Open("mysql", os.Getenv("DB_USER_NAME")+":"+os.Getenv("DB_USER_PASS")+"@tcp("+os.Getenv("DB_HOST")+":"+os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME"))
+		if err != nil {
+			log.Printf("DB Connection Failed!")
+			panic(err.Error())
+		}
+
+		defer db.Close()
+
+		// Get the Max Row in the DB for given entry name
+		// Select start date time and end date time
+		var currentStatusQuery = fmt.Sprintf("select start_date_time,IFNULL(end_date_time,'None') from timer_entries where entry_name='%s' and entry_id = (select * from (select entry_id from timer_entries where entry_name='%s' order by entry_id desc limit 1) ali)", os.Getenv("ENTRY_NAME"), os.Getenv("ENTRY_NAME"))
+
+		results, err := db.Query(currentStatusQuery)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		for results.Next() {
+
+			var timeFromDB TimeFromDB
+			err = results.Scan(&timeFromDB.StartDateTime, &timeFromDB.EndDateTime)
+			if err != nil {
+				log.Printf("No Rows Found for current date time query!")
+				panic(err.Error())
+			}
+
+			// If end date time is null then status should be set as "Nap Started at - start_date_time"
+			// Else status should be set as "Last Nap was at - end_date_time"
+			if timeFromDB.EndDateTime == "None" {
+				currentStatusText = fmt.Sprintf("Nap Started at - %s", timeFromDB.StartDateTime)
+			} else {
+				currentStatusText = fmt.Sprintf("Last Nap Ended at - %s", timeFromDB.EndDateTime)
+			}
+
+		}
+
+	} else {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+
+	log.Print(currentStatusText)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	fmt.Fprintf(w, currentStatusText+"!")
 
 }

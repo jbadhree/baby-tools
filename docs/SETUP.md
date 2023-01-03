@@ -52,3 +52,5 @@ https://setapp.com/how-to/use-go-with-mysql
 Test Server 
 
 curl -X POST 'http://localhost:8080/test' -d '{"activityName":"Start","activityTime":"2:00:00 AM"}' 
+
+curl -X GET 'http://localhost:8080/current'

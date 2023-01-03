@@ -33,6 +33,8 @@ PM2 is installed globally
 
 cd in to client directory
 
+npm i 
+
 Build 
 
 npm run build
