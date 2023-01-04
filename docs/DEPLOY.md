@@ -1,5 +1,7 @@
 # Deployment Steps
 
+Currently deployed in Ubuntu 20
+
 # Environment variables that need to be created 
 
 export DB_USER_NAME=BBBBBBBB
@@ -13,7 +15,9 @@ export ENTRY_NAME=test
 
 cd in to server directory
 
-nohup go run *go &
+go build -o main . 
+
+nohup ./main &
 
 ## Undeploy 
 
