@@ -3,9 +3,9 @@
 ## Functional
 
 - Add Notes feature
-- Current time must be auto populated in 
-- Calculate Duration
-- Track Date as well 
+- Current time must be auto populated - Done
+- Calculate Duration - Done 
+- Track Date as well - Done 
 
 ## Non Functional
 

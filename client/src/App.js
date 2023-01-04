@@ -278,18 +278,7 @@ function App() {
         <Row>
           <p></p>
         </Row>
-        <Row>
-          <p></p>
-        </Row>
-        <Row>
-          <p></p>
-        </Row>
-        <Row>
-          <p></p>
-        </Row>
-        <Row>
-          <p></p>
-        </Row>
+
 
      
     </div>
