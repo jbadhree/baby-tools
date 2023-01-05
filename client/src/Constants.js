@@ -1,6 +1,6 @@
 const prod = {
     url: {
-     API_BASE_URL: "http://192.168.8.205:8080"
+     API_BASE_URL: "http://subh.babus.net"
     }
  };
 

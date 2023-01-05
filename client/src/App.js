@@ -1,5 +1,5 @@
 import "./App.css";
-import { Button, Space, TimePicker, Row, Table } from "antd";
+import { Button, Space, TimePicker, Row, Table, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import React, { useState, useEffect } from "react";
 import { config } from './Constants'
@@ -168,14 +168,26 @@ function App() {
         </Row>
         <Row><p></p></Row>
         <Row>
-        <Space>
-            <Button type="primary" onClick={handleButtonClick}>
+        
+        <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: '#000000',
+                colorSecondary: '#FF0000',
+              },
+            }}
+        >
+          <Space>
+          <Button type="primary" onClick={handleButtonClick}>
               Start
             </Button>
             <Button type="primary" onClick={handleButtonClick}>
               Stop
             </Button>
-          </Space>
+            </Space>
+        </ConfigProvider>
+            
+          
         </Row> 
                    
         
