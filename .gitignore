@@ -1,4 +1,7 @@
-DONOTCOMMIT.md
+client/node_modules/
+client/build/
 
 
-baby-tools-client/node_modules/
+queries.sql
+
+.vscode/
