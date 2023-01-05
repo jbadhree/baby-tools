@@ -26,64 +26,7 @@ const columns = [
     key: 'endTime',
   },
 ];
-const staticTableData = [
-  {
-    key: 1,
-    duration: '1 hour',
-    startTime: '1-3-2023 1:00 PM',
-    endTime: '1-3-2023 2:00 PM',
-    description: 'None',
-  },
-  {
-    key: 2,
-    duration: '1 hour',
-    startTime: '1-3-2023 1:00 PM',
-    endTime: '1-3-2023 2:00 PM',
-    description: 'hghghgh',
-  },
-  {
-    key: 3,
-    duration: '1 hour',
-    startTime: '1-3-2023 1:00 PM',
-    endTime: '1-3-2023 2:00 PM',
-    description: 'None',
-  },
-  {
-    key: 4,
-    duration: '1 hour',
-    startTime: '1-3-2023 1:00 PM',
-    endTime: '1-3-2023 2:00 PM',
-    description: 'None',
-  },
-  {
-    key: 5,
-    duration: '2 hour',
-    startTime: '1-3-2023 1:00 PM',
-    endTime: '1-3-20232:00 PM',
-    description: 'None',
-  },
-  {
-    key: 6,
-    duration: '2 hour',
-    startTime: '1-3-2023 1:00 PM',
-    endTime: '1-3-2023 2:00 PM',
-    description: 'sasasas',
-  },
-  {
-    key: 7,
-    duration: '2 hour',
-    startTime: '1-3-2023 1:00 PM',
-    endTime: '1-3-2023 2:00 PM',
-    description: 'None',
-  },
-  {
-    key: 8,
-    duration: '2 hour',
-    startTime: '1-3-2023 1:00 PM',
-    endTime: '1-3-2023 2:00 PM',
-    description: 'qwqwqw',
-  },
-];
+
 
 function App() {
   const [data, setData] = useState(null);
@@ -148,9 +91,7 @@ function App() {
         ...tableParams,
         pagination: {
           ...tableParams.pagination,
-          total: 8,
-          // 200 is mock data, you should read it from server
-          // total: data.totalCount,
+          total: tableData.length,
         },
       });
 
@@ -208,6 +149,7 @@ function App() {
       const text = await response.text();
 
       setData(text);
+      await fetchData();
     } catch (error) {
       console.error(error);
     }
@@ -272,14 +214,6 @@ function App() {
         <Row>
           <p></p>
         </Row>
-        <Row>
-          <p></p>
-        </Row>
-        <Row>
-          <p></p>
-        </Row>
-
-
      
     </div>
   );

@@ -213,7 +213,7 @@ func HandleLatestEntries(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 
-	log.Print(latestEntriesOutput)
+	// log.Print(latestEntriesOutput)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
