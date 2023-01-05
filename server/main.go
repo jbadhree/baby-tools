@@ -190,7 +190,7 @@ func HandleLatestEntries(w http.ResponseWriter, r *http.Request) {
 		// Get the Max Row in the DB for given entry name
 		// Select start date time and end date time
 		// Escaping % using Hex code for % (25)
-		var latestEntriesQuery = fmt.Sprintf("select entry_id as 'key', IFNULL(CAST(TIMEDIFF(STR_TO_DATE(end_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p'),STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p')) As CHAR),'None') duration, start_date_time as startTime, IFNULL(end_date_time, 'None') as endTime, 'None' as description from timer_entries where STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p') >= DATE_ADD(convert_tz(now(),'+00:00','-05:00'), INTERVAL -24 HOUR) and entry_name='%s' order by entry_id desc;", os.Getenv("ENTRY_NAME"))
+		var latestEntriesQuery = fmt.Sprintf("select entry_id as 'key', IFNULL(CAST(TIMEDIFF(STR_TO_DATE(end_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p'),STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p')) As CHAR),'None') duration, start_date_time as startTime, IFNULL(end_date_time, 'None') as endTime, 'None' as description from timer_entries where STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p') >= DATE_ADD(convert_tz(now(),'+00:00','-05:00'), INTERVAL -48 HOUR) and entry_name='%s' order by entry_id desc;", os.Getenv("ENTRY_NAME"))
 		// log.Print(latestEntriesQuery)
 		results, err := db.Query(latestEntriesQuery)
 		if err != nil {
