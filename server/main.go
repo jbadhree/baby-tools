@@ -86,7 +86,7 @@ func HandleInsert(w http.ResponseWriter, r *http.Request) {
 		if body.ActivityName == "Start" {
 			q = fmt.Sprintf("insert into timer_entries (entry_name,start_date_time, start_message) values ('%s','%s', '%s')", os.Getenv("ENTRY_NAME"), body.ActivityTime, message)
 		} else {
-			q = fmt.Sprintf("update timer_entries set end_date_time = '%s', stop_message = '%s' where entry_id=(select * from (select entry_id from timer_entries where entry_name='%s' and end_date_time is null order by entry_id desc limit 1) ali)", body.ActivityTime, message, os.Getenv("ENTRY_NAME"))
+			q = fmt.Sprintf("update timer_entries set end_date_time = '%s', stop_message = '%s', duration = CAST(TIMEDIFF(STR_TO_DATE('%s','\x25%m-\x25%d-\x25%Y \x25%h:\x25%i \x25%p'),STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i \x25%p')) As CHAR) where entry_id=(select * from (select entry_id from timer_entries where entry_name='%s' and end_date_time is null order by entry_id desc limit 1) ali)", body.ActivityTime, message, body.ActivityTime, os.Getenv("ENTRY_NAME"))
 		}
 
 		insertOrUpdate, err := db.Query(q)
@@ -200,7 +200,10 @@ func HandleLatestEntries(w http.ResponseWriter, r *http.Request) {
 		// Get the Max Row in the DB for given entry name
 		// Select start date time and end date time
 		// Escaping % using Hex code for % (25)
-		var latestEntriesQuery = fmt.Sprintf("select entry_id as 'key', IFNULL(CAST(TIMEDIFF(STR_TO_DATE(end_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p'),STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p')) As CHAR),'None') duration, start_date_time as startTime, IFNULL(end_date_time, 'None') as endTime,  CONCAT('Start Message: ', IFNULL(start_message,'None'), '  |  ','Stop Message: ' , IFNULL(stop_message,'None')) as description from timer_entries where STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p') >= DATE_ADD(convert_tz(now(),'+00:00','-05:00'), INTERVAL -48 HOUR) and entry_name='%s' order by entry_id desc;", os.Getenv("ENTRY_NAME"))
+		// The Or condition in where condition to get last 48 hour data can be removed after few days
+		// Its added so that it fetched the entries with seconds as well
+		// Need to see if we can remove seonds from old records from DB
+		var latestEntriesQuery = fmt.Sprintf("select entry_id as 'key', IFNULL(duration,'None') as duration, start_date_time as startTime, IFNULL(end_date_time, 'None') as endTime,  CONCAT('Start Message: ', IFNULL(start_message,'None'), '  |  ','Stop Message: ' , IFNULL(stop_message,'None')) as description from timer_entries where (STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i \x25%p') >= DATE_ADD(convert_tz(now(),'+00:00','-05:00'), INTERVAL -48 HOUR) or STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p') >= DATE_ADD(convert_tz(now(),'+00:00','-05:00'), INTERVAL -48 HOUR)) and entry_name='%s' order by entry_id desc", os.Getenv("ENTRY_NAME"))
 		// log.Print(latestEntriesQuery)
 		results, err := db.Query(latestEntriesQuery)
 		if err != nil {
@@ -223,7 +226,7 @@ func HandleLatestEntries(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 
-	// log.Print(latestEntriesOutput)
+	log.Print(latestEntriesOutput)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")

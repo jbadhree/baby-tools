@@ -93,7 +93,7 @@ function App() {
       
 
       // Set current datetime
-      const dateTime = dayjs(dayjs()).format("M-D-YYYY h:mm:ss A").toString()
+      const dateTime = dayjs(dayjs()).format("M-D-YYYY h:mm A").toString()
       setTime(dateTime);
 
       // Set table data to values from DB
@@ -180,7 +180,7 @@ function App() {
         <Row>
         <TimePicker
             use12Hours
-            format="M-D-YYYY h:mm:ss A"
+            format="M-D-YYYY h:mm A"
             defaultValue={dayjs()}
             onChange={handleTimeChange}
           />

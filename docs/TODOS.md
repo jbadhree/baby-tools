@@ -2,11 +2,11 @@
 
 ## Functional
 
-- Add Notes feature
+- Add Notes feature - Done 
 - Current time must be auto populated - Done
 - Calculate Duration - Done 
 - Track Date as well - Done 
-- Remove seconds from 
+- Remove seconds from - Done 
 
 ## Non Functional
 

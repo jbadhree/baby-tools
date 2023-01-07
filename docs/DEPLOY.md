@@ -28,6 +28,7 @@ cd in to server directory
 
 netstat -nlp|grep 8080 - Get pid 
 kill pid 
+rm main
 rm nohup.out
 rm subh.babus.net.key
 rm subh.babus.net.crt
