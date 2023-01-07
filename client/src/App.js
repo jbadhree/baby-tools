@@ -177,17 +177,31 @@ function App() {
   return (
     <div className="App">
       
+      
         <Row>
+          <Space>
+          
+        <Row><p>Time</p></Row>
         <TimePicker
             use12Hours
             format="M-D-YYYY h:mm A"
             defaultValue={dayjs()}
             onChange={handleTimeChange}
           />
+          </Space>
         </Row>
-        <Row><p></p></Row>
         <Row>
+          <Space>
+          <Row><p>Notes</p></Row>
+          <Row>
+        <TextArea showCount maxLength={50} type="text" id="message" name="message" onChange={handleMessageChange} value={message}/>
+        </Row>
+          </Space>
+        </Row>
         
+        <Row><p></p></Row>
+        
+        <Row>
         <ConfigProvider
             theme={{
               token: {
@@ -205,16 +219,8 @@ function App() {
             </Button>
             </Space>
         </ConfigProvider>
-            
-          
         </Row> 
 
-         <Row><p></p></Row>
-        <Row>
-        <TextArea showCount maxLength={50} type="text" id="message" name="message" onChange={handleMessageChange} value={message}/>
-        </Row>          
-           
-        <Row><p></p></Row>
         <Row>
         {data && <p>{data}</p>}
         </Row>
