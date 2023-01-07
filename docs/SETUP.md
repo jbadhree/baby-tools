@@ -54,3 +54,13 @@ Test Server
 curl -X POST 'http://localhost:8080/test' -d '{"activityName":"Start","activityTime":"2:00:00 AM"}' 
 
 curl -X GET 'http://localhost:8080/current'
+
+
+curl -X GET 'http://subh.babus.net/latestentries'
+
+
+TLS for Go Lang 
+
+openssl req  -new  -newkey rsa:2048  -nodes  -keyout subh.babus.net.key  -out subh.babus.net.csr
+
+openssl  x509  -req  -days 365  -in subh.babus.net.csr  -signkey subh.babus.net.key  -out subh.babus.net.crt

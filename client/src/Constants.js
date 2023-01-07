@@ -1,6 +1,6 @@
 const prod = {
     url: {
-     API_BASE_URL: "http://subh.babus.net"
+     API_BASE_URL: "https://subh.babus.net"
     }
  };
 

@@ -1,9 +1,10 @@
 import "./App.css";
-import { Button, Space, TimePicker, Row, Table, ConfigProvider } from "antd";
+import { Button, Space, TimePicker, Row, Table, ConfigProvider, Input } from "antd";
 import dayjs from "dayjs";
 import React, { useState, useEffect } from "react";
 import { config } from './Constants'
 
+const { TextArea } = Input;
 
 const serverBaseURL = config.url.API_BASE_URL;
 
@@ -31,6 +32,8 @@ const columns = [
 function App() {
   const [data, setData] = useState(null);
   const [time, setTime] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [notes, setNotes] = useState(message);
   const [tableData, setTableData] = useState();
   //const [currentStatusText,setCurrentStatusText] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -40,6 +43,7 @@ function App() {
       pageSize: 4,
     },
   });
+  
   const fetchData = async () => {
     setLoading(true);
     const requestOptions = {
@@ -66,6 +70,8 @@ function App() {
   // Load initial data from DB
   useEffect(() => {
     const onPageLoad = async () => {
+
+      // Get latest Table data 
       await fetchData();
       
       const requestOptions = {
@@ -73,20 +79,24 @@ function App() {
       };
 
       
-      // invoke the /current endpoint 
+      // invoke the /current endpoint to get current Status from DB
       const response = await fetch(
         serverBaseURL + "/current",
         requestOptions
       );
 
       const text = await response.text();
-
+      
+      // Set current Status based on DB
       var initialTextFromDB = text ;
       setData(initialTextFromDB);
+      
+
+      // Set current datetime
       const dateTime = dayjs(dayjs()).format("M-D-YYYY h:mm:ss A").toString()
       setTime(dateTime);
 
-
+      // Set table data to values from DB
       setTableParams({
         ...tableParams,
         pagination: {
@@ -116,7 +126,7 @@ function App() {
       ...sorter,
     });
 
-    // `dataSource` is useless since `pageSize` changed
+    
     if (pagination.pageSize !== tableParams.pagination?.pageSize) {
       setData([]);
     }
@@ -127,13 +137,21 @@ function App() {
     setTime(timeString);
   };
 
+  const handleMessageChange = event => {
+    setMessage(event.target.value);
+    console.log(message)
+  };
+
   const handleButtonClick = async (event) => {
     try {
       let activityName = event.target.innerText;
       let activityTime = time;
 
+      setNotes(message);
+      //let message = message;
+
       
-      let reqBody = { activityName: activityName, activityTime: activityTime };
+      let reqBody = { activityName: activityName, activityTime: activityTime , message:message};
       console.log(JSON.stringify(reqBody));
 
       const requestOptions = {
@@ -147,6 +165,7 @@ function App() {
         requestOptions
       );
       const text = await response.text();
+      console.log(message);
 
       setData(text);
       await fetchData();
@@ -189,9 +208,18 @@ function App() {
             
           
         </Row> 
-                   
-        
-       {data && <p>{data}</p>}
+
+         <Row><p></p></Row>
+        <Row>
+        <TextArea showCount maxLength={50} type="text" id="message" name="message" onChange={handleMessageChange} value={message}/>
+        </Row>          
+           
+        <Row><p></p></Row>
+        <Row>
+        {data && <p>{data}</p>}
+        </Row>
+       
+       
         
         <Table
           columns={columns}
@@ -217,15 +245,7 @@ function App() {
           // dirty way of pushing other contents up
         }
          
-        <Row>
-          <p></p>
-        </Row>
-        <Row>
-          <p></p>
-        </Row>
-        <Row>
-          <p></p>
-        </Row>
+        
      
     </div>
   );

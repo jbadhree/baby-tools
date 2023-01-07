@@ -15,6 +15,7 @@ import (
 type requestBody struct {
 	ActivityName string `json:"activityName"`
 	ActivityTime string `json:"activityTime"`
+	Message      string `json:"message"`
 }
 
 // format of the latest start and end time records from DB
@@ -38,13 +39,15 @@ func main() {
 	http.HandleFunc("/insert", HandleInsert)
 	http.HandleFunc("/current", HandleCurrentStatus)
 	http.HandleFunc("/latestentries", HandleLatestEntries)
-	http.ListenAndServe(":8080", nil) // may need to change port
+	//http.ListenAndServe(":8080", nil) // may need to change port
+	http.ListenAndServeTLS(":8080", "subh.babus.net.crt", "subh.babus.net.key", nil) // may need to change port
 }
 
 func HandleInsert(w http.ResponseWriter, r *http.Request) {
 	// Initialize to empty string so that it can be used to send response
 	var activity_name = ""
 	var activity_time = ""
+	var message = ""
 	// If its not a POST error out
 	if r.Method == http.MethodPost {
 		var body requestBody // 'body' is of type struct requestBody
@@ -59,6 +62,13 @@ func HandleInsert(w http.ResponseWriter, r *http.Request) {
 
 		activity_name = body.ActivityName
 		activity_time = body.ActivityTime
+
+		if len(body.Message) > 0 {
+			message = body.Message
+		} else {
+			message = "None"
+		}
+
 		// Connect DB based in values from Env Vars
 		// Need to move it to sep function
 		db, err := sql.Open("mysql", os.Getenv("DB_USER_NAME")+":"+os.Getenv("DB_USER_PASS")+"@tcp("+os.Getenv("DB_HOST")+":"+os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME"))
@@ -74,9 +84,9 @@ func HandleInsert(w http.ResponseWriter, r *http.Request) {
 		// What if the user forgot to press stop ?
 		var q = "" // better variable names
 		if body.ActivityName == "Start" {
-			q = fmt.Sprintf("insert into timer_entries (entry_name,start_date_time) values ('%s','%s')", os.Getenv("ENTRY_NAME"), body.ActivityTime)
+			q = fmt.Sprintf("insert into timer_entries (entry_name,start_date_time, start_message) values ('%s','%s', '%s')", os.Getenv("ENTRY_NAME"), body.ActivityTime, message)
 		} else {
-			q = fmt.Sprintf("update timer_entries set end_date_time = '%s' where entry_id=(select * from (select entry_id from timer_entries where entry_name='%s' and end_date_time is null order by entry_id desc limit 1) ali)", body.ActivityTime, os.Getenv("ENTRY_NAME"))
+			q = fmt.Sprintf("update timer_entries set end_date_time = '%s', stop_message = '%s' where entry_id=(select * from (select entry_id from timer_entries where entry_name='%s' and end_date_time is null order by entry_id desc limit 1) ali)", body.ActivityTime, message, os.Getenv("ENTRY_NAME"))
 		}
 
 		insertOrUpdate, err := db.Query(q)
@@ -96,8 +106,8 @@ func HandleInsert(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Yay, values updated!")
 		}
 
-		log.Printf("Hello, %s!", body.ActivityName)
-		log.Printf("Hello, %s!", body.ActivityTime)
+		// log.Printf("Hello, %s!", body.ActivityName)
+		// log.Printf("Hello, %s!", body.ActivityTime)
 	} else {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
@@ -190,7 +200,7 @@ func HandleLatestEntries(w http.ResponseWriter, r *http.Request) {
 		// Get the Max Row in the DB for given entry name
 		// Select start date time and end date time
 		// Escaping % using Hex code for % (25)
-		var latestEntriesQuery = fmt.Sprintf("select entry_id as 'key', IFNULL(CAST(TIMEDIFF(STR_TO_DATE(end_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p'),STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p')) As CHAR),'None') duration, start_date_time as startTime, IFNULL(end_date_time, 'None') as endTime, 'None' as description from timer_entries where STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p') >= DATE_ADD(convert_tz(now(),'+00:00','-05:00'), INTERVAL -48 HOUR) and entry_name='%s' order by entry_id desc;", os.Getenv("ENTRY_NAME"))
+		var latestEntriesQuery = fmt.Sprintf("select entry_id as 'key', IFNULL(CAST(TIMEDIFF(STR_TO_DATE(end_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p'),STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p')) As CHAR),'None') duration, start_date_time as startTime, IFNULL(end_date_time, 'None') as endTime,  CONCAT('Start Message: ', IFNULL(start_message,'None'), '  |  ','Stop Message: ' , IFNULL(stop_message,'None')) as description from timer_entries where STR_TO_DATE(start_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i:\x25%s \x25%p') >= DATE_ADD(convert_tz(now(),'+00:00','-05:00'), INTERVAL -48 HOUR) and entry_name='%s' order by entry_id desc;", os.Getenv("ENTRY_NAME"))
 		// log.Print(latestEntriesQuery)
 		results, err := db.Query(latestEntriesQuery)
 		if err != nil {

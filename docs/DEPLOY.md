@@ -15,6 +15,9 @@ export ENTRY_NAME=test
 
 cd in to server directory
 
+cp ~/subh.babus.net.key .
+cp ~/subh.babus.net.crt .
+
 go build -o main . 
 
 nohup ./main &
@@ -26,7 +29,8 @@ cd in to server directory
 netstat -nlp|grep 8080 - Get pid 
 kill pid 
 rm nohup.out
-
+rm subh.babus.net.key
+rm subh.babus.net.crt
 
 Need to change this to run as a service
 
