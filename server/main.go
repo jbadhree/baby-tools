@@ -7,6 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -165,7 +168,48 @@ func HandleCurrentStatus(w http.ResponseWriter, r *http.Request) {
 			if timeFromDB.EndDateTime == "None" {
 				currentStatusText = fmt.Sprintf("Nap Started at - %s", timeFromDB.StartDateTime)
 			} else {
-				currentStatusText = fmt.Sprintf("Last Nap Ended at - %s", timeFromDB.EndDateTime)
+
+				// All this logic does is calculate the difference between Now and EndDateTime and adds it to currentStatusText
+				var splitDateTime = strings.Split(timeFromDB.EndDateTime, " ")
+				var splitDate = strings.Split(splitDateTime[0], "-")
+				endDateTimeYear, err := strconv.Atoi(splitDate[2])
+				if err != nil {
+					log.Print("Error in Time Conversion")
+					log.Print(err)
+				}
+				endDateTimeMonth, err := strconv.Atoi(splitDate[0])
+				if err != nil {
+					log.Print("Error in Time Conversion")
+					log.Print(err)
+				}
+				endDateTimeDate, err := strconv.Atoi(splitDate[1])
+				if err != nil {
+					log.Print("Error in Time Conversion")
+					log.Print(err)
+				}
+				var splitTime = strings.Split(splitDateTime[1], ":")
+				if err != nil {
+					log.Print("Error in Time Conversion")
+					log.Print(err)
+				}
+				endDateTimeHour, err := strconv.Atoi(splitTime[0])
+				if err != nil {
+					log.Print("Error in Time Conversion")
+					log.Print(err)
+				}
+				endDateTimeMinute, err := strconv.Atoi(splitTime[1])
+				if err != nil {
+					log.Print("Error in Time Conversion")
+					log.Print(err)
+				}
+				if splitDateTime[2] == "PM" {
+					endDateTimeHour = endDateTimeHour + 12
+				}
+				currentTime := time.Now()
+				lastEndTime := time.Date(endDateTimeYear, time.Month(endDateTimeMonth), endDateTimeDate, endDateTimeHour, endDateTimeMinute, 0, 0, time.Now().Local().Location())
+				diff := currentTime.Sub(lastEndTime)
+				// log.Print(diff.Minutes())
+				currentStatusText = fmt.Sprintf("Last Nap Ended at - %s \n %f Minutes Past", timeFromDB.EndDateTime, diff.Minutes())
 			}
 
 		}
