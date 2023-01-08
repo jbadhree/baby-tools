@@ -208,7 +208,7 @@ func HandleCurrentStatus(w http.ResponseWriter, r *http.Request) {
 				currentTime := time.Now()
 				lastEndTime := time.Date(endDateTimeYear, time.Month(endDateTimeMonth), endDateTimeDate, endDateTimeHour, endDateTimeMinute, 0, 0, time.Now().Local().Location())
 				diff := currentTime.Sub(lastEndTime)
-				// log.Print(diff.Minutes())
+				log.Printf("Current Time: %d, Last End Time: %d, Diff: %f", currentTime, lastEndTime, diff.Minutes())
 				currentStatusText = fmt.Sprintf("Last Nap Ended at - %s \n %f Minutes Past", timeFromDB.EndDateTime, diff.Minutes())
 			}
 
@@ -270,7 +270,7 @@ func HandleLatestEntries(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 
-	log.Print(latestEntriesOutput)
+	// log.Print(latestEntriesOutput)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
