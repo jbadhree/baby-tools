@@ -1,4 +1,4 @@
-module baby-tools-server
+module server
 
 go 1.19
 

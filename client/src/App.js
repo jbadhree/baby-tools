@@ -46,6 +46,7 @@ function App() {
   
   const fetchData = async () => {
     setLoading(true);
+    
     const requestOptions = {
       method: "GET",
     };
@@ -54,14 +55,21 @@ function App() {
       requestOptions
     );
     const responseJson = await response.json();
-    
+    var length = 0;
+    try{
+      if(responseJson!=null){
+        length=responseJson.length;
+      }
+    }catch (e){
+      console.log(e)
+    }
     setTableData(responseJson);
     setLoading(false);
     setTableParams({
         ...tableParams,
         pagination: {
           ...tableParams.pagination,
-          total: responseJson.length,
+          total: length,
           },
     });
       
@@ -69,7 +77,9 @@ function App() {
 
   // Load initial data from DB
   useEffect(() => {
+   
     const onPageLoad = async () => {
+     
 
       // Get latest Table data 
       await fetchData();
@@ -148,7 +158,7 @@ function App() {
       let activityTime = time;
 
       setNotes(message);
-      //let message = message;
+      
 
       
       let reqBody = { activityName: activityName, activityTime: activityTime , message:message};

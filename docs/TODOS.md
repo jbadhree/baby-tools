@@ -7,6 +7,8 @@
 - Calculate Duration - Done 
 - Track Date as well - Done 
 - Remove seconds from - Done 
+- Add duration after nap started at to see how long the naps are - Done
+- Clean up the table
 
 ## Non Functional
 
