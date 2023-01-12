@@ -33,7 +33,8 @@ function App() {
   const [data, setData] = useState(null);
   const [time, setTime] = useState(null);
   const [message, setMessage] = useState(null);
-  const [notes, setNotes] = useState(message);
+  //const [notes, setNotes] = useState(message);
+  const [startStop, setStartStop] = useState(false); // state variable to enable or disable start/stop buttons
   const [tableData, setTableData] = useState();
   //const [currentStatusText,setCurrentStatusText] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -96,6 +97,12 @@ function App() {
       );
 
       const text = await response.text();
+      // If last nap - stop must be disbled 
+      // if startStop === true in render, start = disabled={!(startStop)}
+      // and stop = disabled={startStop}
+      if(text.includes("Last Nap")){
+        setStartStop(true)
+      }
       
       // Set current Status based on DB
       var initialTextFromDB = text ;
@@ -149,7 +156,7 @@ function App() {
 
   const handleMessageChange = event => {
     setMessage(event.target.value);
-    console.log(message)
+    //console.log(message)
   };
 
   const handleButtonClick = async (event) => {
@@ -157,7 +164,7 @@ function App() {
       let activityName = event.target.innerText;
       let activityTime = time;
 
-      setNotes(message);
+      setMessage(message);
       
 
       
@@ -175,10 +182,17 @@ function App() {
         requestOptions
       );
       const text = await response.text();
-      console.log(message);
+      //console.log(message);
 
       setData(text);
       await fetchData();
+
+      if(activityName=="Start"){
+        setStartStop(false);
+      }
+      else{
+        setStartStop(true);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -221,10 +235,10 @@ function App() {
             }}
         >
           <Space>
-          <Button type="primary" onClick={handleButtonClick}>
+          <Button type="primary" onClick={handleButtonClick}  disabled={!(startStop)}>
               Start
             </Button>
-            <Button type="primary" onClick={handleButtonClick}>
+            <Button type="primary" onClick={handleButtonClick}  disabled={startStop}>
               Stop
             </Button>
             </Space>
