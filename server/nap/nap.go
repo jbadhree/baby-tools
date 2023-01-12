@@ -157,7 +157,7 @@ func HandleCurrentStatus(w http.ResponseWriter, r *http.Request) {
 			// If end date time is null then status should be set as "Nap Started at - start_date_time"
 			// Else status should be set as "Last Nap was at - end_date_time"
 			if timeFromDB.EndDateTime == "None" {
-				currentStatusText = fmt.Sprintf("Nap Started at - %s \n %s Minutes Past ", timeFromDB.StartDateTime, utils.CustomTimeDiff(timeFromDB.StartDateTime, "ImN", ""))
+				currentStatusText = fmt.Sprintf("Nap Started at - %s \n %s Minutes Past ", timeFromDB.StartDateTime, utils.CustomTimeDiff(timeFromDB.StartDateTime, "NmI", ""))
 			} else {
 
 				currentStatusText = fmt.Sprintf("Last Nap Ended at - %s \n %s Minutes Past", timeFromDB.EndDateTime, utils.CustomTimeDiff(timeFromDB.EndDateTime, "NmI", ""))
