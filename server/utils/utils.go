@@ -55,15 +55,25 @@ func CustomTimeDiff(inputTime string, diffType string, outputFormat string) stri
 		log.Print("Error in Time Conversion")
 		log.Print(err)
 	}
-	if splitDateTime[2] == "PM" {
+
+	// If the time is PM need to add 12 to convert to 24 hour format
+	// but if hour is 12 then no need to add
+	if splitDateTime[2] == "PM" && endDateTimeHour != 12 {
 		endDateTimeHour = endDateTimeHour + 12
+	}
+	// If its AM and hour is 12 then it must be 00 to covert to 24 hour format
+	if splitDateTime[2] == "AM" && endDateTimeHour == 12 {
+		endDateTimeHour = 00
 	}
 
 	convertedInputTime := time.Date(endDateTimeYear, time.Month(endDateTimeMonth), endDateTimeDate, endDateTimeHour, endDateTimeMinute, 0, 0, time.Now().Local().Location())
 	// .... Ends here
 
+	log.Print(convertedInputTime)
+
 	// Current time - Hopefully in same timezone as input time
 	currentTime := time.Now()
+	log.Print(currentTime)
 
 	if diffType == "NmI" {
 		// Return in String
