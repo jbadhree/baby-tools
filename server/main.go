@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	event "server/event"
 	nap "server/nap"
 )
 
@@ -14,6 +15,7 @@ func main() {
 	http.HandleFunc("/insert", nap.HandleInsert)
 	http.HandleFunc("/current", nap.HandleCurrentStatus)
 	http.HandleFunc("/latestentries", nap.HandleLatestEntries)
+	http.HandleFunc("/insertevent", event.HandleFeedEntry)
 
 	// Get hostname and see if it has 123456
 	// If it does serve https else serve http

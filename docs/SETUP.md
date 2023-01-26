@@ -24,18 +24,50 @@ Doc Followed for installation:
 
 ## Tables Created 
 
-create table timer_entries (entry_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, entry_name varchar(25), start_date_time varchar(25), end_date_time varchar(25), insert_date_time datetime , update_date_time datetime);
+CREATE TABLE timer_entries 
+(entry_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+entry_name varchar(25), 
+start_date_time varchar(25), 
+end_date_time varchar(25), 
+insert_date_time datetime , 
+update_date_time datetime
+);
 
 This makes insert_date_time as current time stamp when entry is made in to table  
 
-ALTER TABLE timer_entries MODIFY insert_date_time datetime DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE timer_entries 
+MODIFY insert_date_time datetime 
+DEFAULT CURRENT_TIMESTAMP;
 
 This makes update_date_time as current date time when table is updated 
 
-ALTER TABLE timer_entries MODIFY update_date_time datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE timer_entries 
+MODIFY update_date_time datetime 
+DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
 
 select * from timer_entries;
+
+
+CREATE TABLE event_entries 
+(entry_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+entry_type char(10), 
+event_date_time varchar(25), 
+insert_date_time datetime , 
+update_date_time datetime,
+event_property_1 varchar(25)
+);
+
+ALTER TABLE event_entries 
+MODIFY insert_date_time datetime 
+DEFAULT CURRENT_TIMESTAMP;
+
+
+ALTER TABLE event_entries 
+MODIFY update_date_time datetime 
+DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+
 
 # Server Setup 
 
@@ -57,6 +89,8 @@ curl -X GET 'http://localhost:8080/current'
 
 
 curl -X GET 'http://subh.babus.net/latestentries'
+
+curl -X POST 'http://localhost:8080/evententriest' -d '{"feedTime":"2:00:00 AM","feedQuantity":"4oz"}' 
 
 
 TLS for Go Lang 
