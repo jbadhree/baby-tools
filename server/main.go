@@ -17,6 +17,7 @@ func main() {
 	http.HandleFunc("/latestentries", nap.HandleLatestEntries)
 	http.HandleFunc("/insertevent", event.HandleFeedEntry)
 	http.HandleFunc("/currentevent", event.HandleCurrentStatus)
+	http.HandleFunc("/eventlatestentries", event.HandleLatestEntries)
 
 	// Get hostname and see if it has 123456
 	// If it does serve https else serve http

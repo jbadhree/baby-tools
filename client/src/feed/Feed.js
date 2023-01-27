@@ -1,5 +1,5 @@
 import "./Feed.css"
-import { Button, Space, TimePicker, Row, ConfigProvider, Input } from "antd";
+import { Button, Space, TimePicker, Row, ConfigProvider, Input, Table } from "antd";
 import React, { useState } from "react";
 import { InputNumber } from 'antd';
 import dayjs from "dayjs";
@@ -10,6 +10,19 @@ const serverBaseURL = config.url.API_BASE_URL;
 
 var FeedOnLoadFunction;
 
+const columns = [
+    {
+      title: 'Time',
+      dataIndex: 'time',
+      key: 'time',
+    },
+    Table.EXPAND_COLUMN,
+    {
+      title: 'Quantity',
+      dataIndex: 'quantity',
+      key: 'quantity',
+    },
+  ];
 
 export function Feed (){
     const dateTime = dayjs(dayjs()).format("M-D-YYYY h:mm A").toString();
@@ -17,7 +30,14 @@ export function Feed (){
     const [message, setMessage] = useState(null);
     const [quantity, setQuantity ] = useState("4 oz");
     const [statusText, setStatusText] = useState(null);
-
+    const [loading, setLoading] = useState(false);
+    const [tableData, setTableData] = useState();
+    const [tableParams, setTableParams] = useState({
+        pagination: {
+        current: 1,
+        pageSize: 4,
+        },
+    });
   
 
     FeedOnLoadFunction = async () => {
@@ -38,7 +58,46 @@ export function Feed (){
         // Set current Status based on DB
         var initialTextFromDB = text ;
         setStatusText(initialTextFromDB);
+
+        setLoading(true);
+    
+        
+        const latestEntriesResponse = await fetch(
+        serverBaseURL + "/eventlatestentries",
+        requestOptions
+        );
+        const responseJson = await latestEntriesResponse.json();
+        var length = 0;
+        try{
+        if(responseJson!=null){
+            length=responseJson.length;
+        }
+        }catch (e){
+        console.log(e)
+        }
+        setTableData(responseJson);
+        setLoading(false);
+        setTableParams({
+            ...tableParams,
+            pagination: {
+            ...tableParams.pagination,
+            total: length,
+            },
+        });
     }
+
+    const handleTableChange = (pagination, filters, sorter) => {
+        setTableParams({
+          pagination,
+          filters,
+          ...sorter,
+        });
+    
+        
+        if (pagination.pageSize !== tableParams.pagination?.pageSize) {
+          setStatusText([]);
+        }
+      };
 
     
 
@@ -143,6 +202,26 @@ export function Feed (){
         <Row>
         {statusText && <p>{statusText}</p>}
         </Row>
+
+        <Table
+          columns={columns}
+          expandable={{
+            expandedRowRender: (record) => (
+              <p
+                style={{
+                  margin: 0,
+                }}
+              >
+                {record.description}
+              </p>
+            ),
+            
+          }}
+          dataSource={tableData}
+          pagination={tableParams.pagination}
+          loading={loading}
+          onChange={handleTableChange}
+        /> 
 
         </div>
     );

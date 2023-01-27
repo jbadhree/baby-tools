@@ -24,6 +24,15 @@ type LatestData struct {
 	LatestEventDateTime string `json:"latest_event_date_time"`
 }
 
+// type to parse latest entries from db
+
+type LatestEntries struct {
+	Key         string `json:"key"`
+	Time        string `json:"time"`
+	Quantity    string `json:"quantity"`
+	Description string `json:"description"`
+}
+
 func HandleFeedEntry(w http.ResponseWriter, r *http.Request) {
 	log.Print("Inside HandleFeedEntry")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -120,5 +129,56 @@ func HandleCurrentStatus(w http.ResponseWriter, r *http.Request) {
 
 	log.Print(currentStatusText)
 	fmt.Fprintf(w, currentStatusText+"!")
+
+}
+
+// Get the last 24 hours data and return in a format that react can understand better
+func HandleLatestEntries(w http.ResponseWriter, r *http.Request) {
+	log.Print("Inside Latest Entries")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+
+	var latestEntriesOutput []LatestEntries
+	if r.Method == http.MethodGet {
+
+		// May need to move to different function
+		db, err := sql.Open("mysql", os.Getenv("DB_USER_NAME")+":"+os.Getenv("DB_USER_PASS")+"@tcp("+os.Getenv("DB_HOST")+":"+os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME"))
+		if err != nil {
+			log.Printf("DB Connection Failed!")
+			panic(err.Error())
+		}
+
+		defer db.Close()
+
+		// Get the Max Row in the DB for given entry name
+		// Select start date time and end date time
+		// Escaping % using Hex code for % (25)
+
+		var latestEntriesQuery = fmt.Sprintf("select entry_id as 'key', event_date_time as time, IFNULL(event_property_1, 'None') as quantity,  IFNULL(message,'None') as description from event_entries where STR_TO_DATE(event_date_time,'\x25%m-\x25%d-\x25%Y \x25%h:\x25%i \x25%p') >= DATE_ADD(convert_tz(now(),'+00:00','-05:00'), INTERVAL -48 HOUR)  and entry_type='%s' order by entry_id desc", os.Getenv("ENTRY_NAME"))
+		// log.Print(latestEntriesQuery)
+		results, err := db.Query(latestEntriesQuery)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		for results.Next() {
+
+			var latestEntries LatestEntries
+			err = results.Scan(&latestEntries.Key, &latestEntries.Time, &latestEntries.Quantity, &latestEntries.Description)
+			if err != nil {
+				log.Printf("No Rows Found for current date time query!")
+				panic(err.Error())
+			}
+			latestEntriesOutput = append(latestEntriesOutput, latestEntries)
+
+		}
+
+	} else {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+
+	log.Print(latestEntriesOutput)
+
+	json.NewEncoder(w).Encode(latestEntriesOutput)
 
 }
