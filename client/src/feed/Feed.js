@@ -8,16 +8,39 @@ import { config } from '../Constants';
 const { TextArea } = Input;
 const serverBaseURL = config.url.API_BASE_URL;
 
+var FeedOnLoadFunction;
 
 
 export function Feed (){
     const dateTime = dayjs(dayjs()).format("M-D-YYYY h:mm A").toString();
     const [time, setTime] = useState(dateTime);
-  const [message, setMessage] = useState(null);
-  const [quantity, setQuantity ] = useState("3oz");
-  const [statusText, setStatusText] = useState(null);
+    const [message, setMessage] = useState(null);
+    const [quantity, setQuantity ] = useState("4 oz");
+    const [statusText, setStatusText] = useState(null);
 
   
+
+    FeedOnLoadFunction = async () => {
+        const requestOptions = {
+            method: "GET",
+        };
+    
+          
+        // invoke the /current endpoint to get current Status from DB
+        const response = await fetch(
+            serverBaseURL + "/currentevent",
+            requestOptions
+        );
+    
+        const text = await response.text();
+        
+          
+        // Set current Status based on DB
+        var initialTextFromDB = text ;
+        setStatusText(initialTextFromDB);
+    }
+
+    
 
     const handleTimeChange = (time, timeString) => {
         console.log(timeString)
@@ -31,7 +54,7 @@ export function Feed (){
 
       const onQuantityChange = (value) => {
         console.log('changed', value);
-        setQuantity(value+"oz");
+        setQuantity(value+" oz");
       };
 
       const handleButtonClick = async (event) => {
@@ -41,7 +64,7 @@ export function Feed (){
     
           setMessage(message);
 
-          setQuantity(quantity+"oz");
+          setQuantity(quantity+" oz");
           
     
           
@@ -126,3 +149,4 @@ export function Feed (){
 
 }
 
+export {FeedOnLoadFunction}

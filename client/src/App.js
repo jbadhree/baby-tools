@@ -1,49 +1,54 @@
 import "./App.css";
-import React, {useEffect, useState} from "react";
-import { Feed } from "./feed/Feed";
+import React, {useEffect} from "react";
+import PropTypes from 'prop-types';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import { Feed, FeedOnLoadFunction } from "./feed/Feed";
 import { Nap, NapOnLoadFunction } from "./nap/Nap";
 
-import {Row } from "antd";
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
 
-const Tabs = (props) => {
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const activeTab = props.children[activeTabIndex];
   return (
-    <div>
-      <div className="tabs">
-        {props.children.map((tab, i) => (
-          <button
-            className="tab-btn"
-            onClick={() => {
-              setActiveTabIndex(i);
-            }}
-            key={i}
-          >
-            {tab.props.title}
-          </button>
-        ))}
-      </div>
-      <div className="tab-indicator-container">
-        <div
-          className="tab-indicator"
-          style={{
-            width: 100 / props.children.length + "%",
-            transform: `translateX(${activeTabIndex * 100}%)`,
-          }}
-        />
-      </div>
-      <div className="tab-content">{activeTab.props.children}</div>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
     </div>
   );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
 };
 
-function App() {
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
 
-  
+function App() {
+  const [value, setValue] = React.useState(0);
 
   useEffect(() => {
     const onPageLoad = async () => { 
       await NapOnLoadFunction();
+      await FeedOnLoadFunction();
+      console.log("all funs loaded")
      
     }
 
@@ -57,29 +62,25 @@ function App() {
 
   });
 
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
 
   return (
-  
-    <div className="App">
-      <Row>
-        <p></p>
-      </Row>
-      <Row>
-      <Tabs>
-      <div title="Nap">
-      <Nap />
-    </div>
-    <div title="Feed">
+    <Box sx={{ width: '100%' }} className="App">
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+          <Tab label="Nap" {...a11yProps(0)} />
+          <Tab label="Feed" {...a11yProps(1)} />
+        </Tabs>
+      </Box>
+      <TabPanel value={value} index={0}>
+        <Nap />
+      </TabPanel>
+      <TabPanel value={value} index={1}>
         <Feed />
-      </div>
-      </Tabs>
-      </Row>
-      
-      
-    </div>
-    
-
-    
+      </TabPanel>
+    </Box>
   );
 }
 

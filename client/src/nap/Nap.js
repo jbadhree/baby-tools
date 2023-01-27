@@ -94,6 +94,9 @@ export function Nap(){
       });
 
     }
+
+
+    
   
   const fetchData = async () => {
     setLoading(true);
@@ -126,65 +129,7 @@ export function Nap(){
       
   };
 
-  // Load initial data from DB
-//   useEffect(() => {
-   
-//     const onPageLoad = async () => {
-     
-
-//       // Get latest Table data 
-//       await fetchData();
-      
-//       const requestOptions = {
-//         method: "GET",
-//       };
-
-      
-//       // invoke the /current endpoint to get current Status from DB
-//       const response = await fetch(
-//         serverBaseURL + "/current",
-//         requestOptions
-//       );
-
-//       const text = await response.text();
-//       // If last nap - stop must be disbled 
-//       // if startStop === true in render, start = disabled={!(startStop)}
-//       // and stop = disabled={startStop}
-//       if(text.includes("Last Nap")){
-//         setStartStop(true)
-//       }
-      
-//       // Set current Status based on DB
-//       var initialTextFromDB = text ;
-//       setData(initialTextFromDB);
-      
-
-//       // Set current datetime
-//       const dateTime = dayjs(dayjs()).format("M-D-YYYY h:mm A").toString()
-//       setTime(dateTime);
-
-//       // Set table data to values from DB
-//       setTableParams({
-//         ...tableParams,
-//         pagination: {
-//           ...tableParams.pagination,
-//           total: tableData.length,
-//         },
-//       });
-
-//     };
-
-    
-
-//     // Check if the page has already loaded
-//     if (document.readyState === 'complete') {
-//       onPageLoad();
-//     } else {
-//       window.addEventListener('load', onPageLoad);
-//       // Remove the event listener when component unmounts
-//       return () => window.removeEventListener('load', onPageLoad);
-//     }
-//   })
+ 
 
   const handleTableChange = (pagination, filters, sorter) => {
     setTableParams({
