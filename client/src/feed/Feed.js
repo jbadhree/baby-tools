@@ -1,7 +1,8 @@
 import "./Feed.css"
-import { Button, Space, TimePicker, Row, ConfigProvider, Input, Table } from "antd";
+import { Button, Space, TimePicker, Row, ConfigProvider, Input, Table, Dropdown } from "antd";
+import { DownOutlined } from '@ant-design/icons';
 import React, { useState } from "react";
-import { InputNumber } from 'antd';
+//import { InputNumber } from 'antd';
 import dayjs from "dayjs";
 import { config } from '../Constants';
 
@@ -23,6 +24,27 @@ const columns = [
       key: 'quantity',
     },
   ];
+
+  const items = [
+    {
+      label: '1',
+      key: '1',
+    },
+    {
+      label: '2',
+      key: '2',
+    },
+    {
+      label: '3',
+      key: '3',
+    },
+    {
+      label: '4',
+      key: '4',
+    },
+  ];
+
+
 
 export function Feed (){
     const dateTime = dayjs(dayjs()).format("M-D-YYYY h:mm A").toString();
@@ -111,10 +133,10 @@ export function Feed (){
         //console.log(message)
       };
 
-      const onQuantityChange = (value) => {
-        console.log('changed', value);
-        setQuantity(value+" oz");
-      };
+    //   const onQuantityChange = (value) => {
+    //     console.log('changed', value);
+    //     setQuantity(value+" oz");
+    //   };
 
       const handleButtonClick = async (event) => {
         try {
@@ -123,7 +145,7 @@ export function Feed (){
     
           setMessage(message);
 
-          setQuantity(quantity+" oz");
+          //setQuantity(quantity+" oz");
           
     
           
@@ -145,11 +167,51 @@ export function Feed (){
     
           setStatusText(text);
           //await fetchData();
+
+          setLoading(true);
+
+       
+          const requestOptionsLatestEntries = {
+            method: "GET",
+        };
+            const latestEntriesResponse = await fetch(
+            serverBaseURL + "/eventlatestentries",
+            requestOptionsLatestEntries
+            );
+            const responseJson = await latestEntriesResponse.json();
+            var length = 0;
+            try{
+            if(responseJson!=null){
+                length=responseJson.length;
+            }
+            }catch (e){
+            console.log(e)
+            }
+            setTableData(responseJson);
+            setLoading(false);
+            setTableParams({
+                ...tableParams,
+                pagination: {
+                ...tableParams.pagination,
+                total: length,
+                },
+            });
     
           
         } catch (error) {
           console.error(error);
         }
+      };
+
+      
+      const handleMenuClick = (value) => {
+        console.log('click', value.key);
+        setQuantity(value.key +" oz");
+      };
+
+      const menuProps = {
+        items,
+        onClick: handleMenuClick,
       };
 
     return(
@@ -169,7 +231,17 @@ export function Feed (){
         <Space>
         <Row><p>Quantity</p></Row>
             <Row>
-            <InputNumber min={1} max={10} defaultValue={3} onChange={onQuantityChange} />
+            
+
+            <Dropdown menu={menuProps}>
+                <Button>
+                    <Space>
+                        {quantity}
+                        <DownOutlined />
+                     </Space>
+                 </Button>
+            </Dropdown>
+
             </Row>
         </Space>
        

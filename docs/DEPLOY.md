@@ -54,7 +54,7 @@ pm2 start index.js
 
 cd in to client directory
 
-pm2 stop index.js
+pm2 stop all
 
 # Check ports to see if its running and get process id 
 netstat -nlp|grep 8080
